@@ -4,6 +4,7 @@
 #include "boost/mpl/print.hpp"
 
 #define val(...) ARBITAL_TYPE_LEVEL_VALUE_OF(__VA_ARGS__)
+#define run(...) ARBITAL_TYPE_LEVEL_RUN(__VA_ARGS__)
 #define TEST(expr, ...) static_assert(boost::is_same<decltype(expr), __VA_ARGS__>::value, __FILE__ ": " BOOST_PP_STRINGIZE(__LINE__))
 
 struct foo;
@@ -51,12 +52,16 @@ TEST(t::replace(val(t::p2), t::bind(val(params3), val(args3))), baz&);
 TEST(t::replace(val(def), t::bind(val(params3), val(args3))), f<f<foo, foo>, baz>&);
 TEST(val(t::fun_t<t::p0(t::p0)>)(val(foo)), foo&);
 
-// template<typename T, typename Ts> struct list;
-// auto head(list<t::p0, _>) -> t::p0;
-// template<typename T, typename ...Ts> auto head(list<T, Ts...>) -> T;
-// template<typename T, typename ...Ts> auto tail(list<T, Ts...>) -> list<Ts...>;
+// auto g(t::p0 x)->decltype(t::is<f<f<t::_> > >(x))
 
-// auto id(t::p0 x) -> decltype(x);
-// auto apply(t::p0 f, t::p1 x) -> decltype(f(x));
+// template<typename T, typename Ts> struct cons_t {};
+// struct nil {};
+// auto cons(t::p0, t::p1) -> cons_t<t::p0, t::p1>;
+
+// auto add_const(t::p0) -> t::p0;
+
+// auto map(t::p0, t::p1) -> 
+
+// TEST(t::run(cons(t::type<int>(), t::type<nil>())), list<int, nil>)
 
 int main() {}

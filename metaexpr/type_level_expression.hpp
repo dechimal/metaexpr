@@ -8,9 +8,13 @@ namespace arbital { namespace typelevel {
 template<typename T> struct type_t;
 template<typename T> struct fun_t;
 template<typename T> struct p;
+template<typename T> struct a;
 struct universal;
 template<typename ...Ts> struct seq;
 template<std::size_t I> struct size_t;
+struct false_t;
+struct true_t;
+template<typename P, typename T> struct is_t;
 
 template<typename T> auto val() -> T&;
 template<template<typename...> class F, typename ...Ts> auto deref(F<Ts&...>&) -> F<Ts...>&;
@@ -40,6 +44,11 @@ template<template<typename...> class Con, typename ...Ts,
          typename ...Args>
 auto replace1(Con<Ts...>&, seq<Params...>& ps, seq<Args...>& as)
     -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), ps, as))...> >()));
+template<typename P, typename T,
+         typename ...Params,
+         typename ...Args>
+auto replace1(is_t<P, T>&, seq<Params...>& ps, seq<Args...>& as)
+    -> decltype(is1(bind(val<seq<P> >(), val<seq<decltype(replace1(val<T>(), ps, as)))> >()));
 template<typename Def,
          typename ...Params,
          typename ...Args>
@@ -103,10 +112,23 @@ auto bind1(seq<R1...>& r1,
                       r2,
                       val<seq<Ts..., Params...> >(),
                       val<seq<Us..., Args...> >()));
+template<typename ...R1,
+         typename ...R2,
+         typename ...Params,
+         typename ...Args>
+auto bind1(seq<R1...>&,
+           seq<R2...>&,
+           seq<Params...>&,
+           seq<Args...>&)
+    -> false_t&;
 
 template<typename ...Params, typename ...Args>
 auto bind(seq<Params...>& ps, seq<Args...>& as)
     -> decltype(bind1(seq_(), seq_(), ps, as));
+
+template<typename P, typename T> auto is(T& x) -> is_t<P, T>&;
+template<typename ...Params, typename ...Args> auto is1(seq<Params..., Args...>&) -> true_t;
+auto is1(false_t&) -> false_t&;
 
 template<typename Def, typename ...Params>
 struct fun_t<Def(Params...)> {
@@ -120,12 +142,19 @@ typedef p<size_t<0> > p0;
 typedef p<size_t<1> > p1;
 typedef p<size_t<2> > p2;
 typedef p<size_t<3> > p3;
+typedef a<size_t<0> > a0;
+typedef a<size_t<1> > a1;
+typedef a<size_t<2> > a2;
+typedef a<size_t<3> > a3;
 
-template<typename T> auto ty(T&) -> type<T>&;
-template<typename T> auto ty(type<T>&) -> type<T>&;
+template<typename T> auto type() -> type_t<T>&;
+template<typename T> auto type(T&) -> type_t<T>&;
+template<typename T> auto type(type_t<T>&) -> type_t<T>&;
+template<typename T> auto run(type_t<T>&) -> T;
 
 }}
 
 #define ARBITAL_TYPE_LEVEL_VALUE_OF(...) ::arbital::typelevel::val<__VA_ARGS__>()
+#define ARBITAL_TYPE_LEVEL_RUN(...) decltype(::arbital::typelevel::run(__VA_ARGS__))
 
 #endif

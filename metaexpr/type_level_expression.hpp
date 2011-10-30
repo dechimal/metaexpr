@@ -71,6 +71,18 @@ auto bind1(seq<R1...>& r1,
                             here::pop_front(as)));
 template<typename ...R1,
          typename ...R2,
+         typename Con, typename ...Params,
+         typename ...Args>
+auto bind1(seq<R1...>& r1,
+           seq<R2...>& r2,
+           seq<type_t<Con>, Params...>& ps,
+           seq<type_t<Con>, Args...>& as)
+    -> decltype(here::bind1(r1,
+                            r2,
+                            here::pop_front(ps),
+                            here::pop_front(as)));
+template<typename ...R1,
+         typename ...R2,
          typename ...Params,
          typename Arg, typename ...Args>
 auto bind1(seq<R1...>& r1,

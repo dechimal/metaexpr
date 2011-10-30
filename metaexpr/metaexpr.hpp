@@ -1,9 +1,9 @@
-#if !defined ARBITAL_TYPE_LEVEL_EXPRESSION_HPP_INCLUDED_
-#define      ARBITAL_TYPE_LEVEL_EXPRESSION_HPP_INCLUDED_
+#if !defined METAEXPR_HPP_INCLUDED_
+#define      METAEXPR_HPP_INCLUDED_
 
 #include <cstddef>
 
-namespace arbital { namespace typelevel {
+namespace metaexpr {
 
 template<typename T> struct type_t;
 template<typename T> struct fun_t;
@@ -138,9 +138,9 @@ template<typename T> auto type(T&) -> type_t<T>&;
 template<typename T> auto type(type_t<T>&) -> type_t<T>&;
 template<typename T> auto run(type_t<T>&) -> T;
 
-}}
+}
 
-#define ARBITAL_TYPE_LEVEL_VALUE_OF(...) ::arbital::typelevel::val<__VA_ARGS__>()
-#define ARBITAL_TYPE_LEVEL_RUN(...) decltype(::arbital::typelevel::run(__VA_ARGS__))
+#define METAEXPR_VALUE_OF(...) ::metaexpr::val<__VA_ARGS__>()
+#define METAEXPR_RUN(...) decltype(::metaexpr::run(__VA_ARGS__))
 
 #endif

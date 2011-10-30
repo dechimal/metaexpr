@@ -1,10 +1,10 @@
-#include "arbital/type_level_expression/type_level_expression.hpp"
+#include "metaexpr/metaexpr.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/preprocessor/stringize.hpp"
 #include "boost/mpl/print.hpp"
 
-#define val(...) ARBITAL_TYPE_LEVEL_VALUE_OF(__VA_ARGS__)
-#define run(...) ARBITAL_TYPE_LEVEL_RUN(__VA_ARGS__)
+#define val(...) METAEXPR_VALUE_OF(__VA_ARGS__)
+#define run(...) METAEXPR_RUN(__VA_ARGS__)
 #define TEST(expr, ...) static_assert(boost::is_same<decltype(expr), __VA_ARGS__>::value, __FILE__ ": " BOOST_PP_STRINGIZE(__LINE__))
 
 struct foo;
@@ -14,63 +14,63 @@ template<typename T, typename U> struct f;
 
 using boost::is_same;
 using boost::mpl::print;
-namespace t = arbital::typelevel;
+namespace m = metaexpr;
 
-typedef t::seq<t::p0, t::p1, t::p2, t::p3> params1;
-typedef t::seq<foo, f<foo, bar>, t::type_t<foo>, baz> args1;
-typedef t::seq<t::seq<t::p0, foo>, t::seq<t::p1, f<foo, bar> >, t::seq<t::p2, t::type_t<foo> >, t::seq<t::p3, baz> > res1;
+typedef m::seq<m::p0, m::p1, m::p2, m::p3> params1;
+typedef m::seq<foo, f<foo, bar>, m::type_t<foo>, baz> args1;
+typedef m::seq<m::seq<m::p0, foo>, m::seq<m::p1, f<foo, bar> >, m::seq<m::p2, m::type_t<foo> >, m::seq<m::p3, baz> > res1;
 
-typedef t::seq<t::p0, f<t::p1, t::_>, t::p2, t::p3> params2;
+typedef m::seq<m::p0, f<m::p1, m::_>, m::p2, m::p3> params2;
 typedef args1 args2;
-typedef t::seq<t::seq<t::p0, foo>, t::seq<t::p1, foo>, t::seq<t::p2, t::type_t<foo> >, t::seq<t::p3, baz> > res2;
+typedef m::seq<m::seq<m::p0, foo>, m::seq<m::p1, foo>, m::seq<m::p2, m::type_t<foo> >, m::seq<m::p3, baz> > res2;
 
-typedef t::seq<t::p0, f<t::p1, t::_>, t::type_t<foo>, t::p2> params3;
+typedef m::seq<m::p0, f<m::p1, m::_>, m::type_t<foo>, m::p2> params3;
 typedef args1 args3;
-typedef t::seq<t::seq<t::p0, foo>, t::seq<t::p1, foo>, t::seq<t::p2, baz> > res3;
+typedef m::seq<m::seq<m::p0, foo>, m::seq<m::p1, foo>, m::seq<m::p2, baz> > res3;
 
-typedef f<f<t::p1, t::p0>, t::p2> def;
+typedef f<f<m::p1, m::p0>, m::p2> def;
 
-TEST(t::seq_(val(foo), val(bar)), t::seq<foo, bar>&);
-TEST(t::push_front(val(foo), t::seq_(val(bar))), t::seq<foo, bar>&);
-TEST(t::push_back(val(bar), t::seq_(val(foo))), t::seq<foo, bar>&);
-TEST(t::pop_front(t::seq_(val(foo))), t::seq<>&);
-TEST(t::at(val(t::size_t<1>), t::seq_(val(foo), val(bar), val(foo))), bar&);
-TEST(t::bind(val(params1), val(args1)), res1&);
-TEST(t::bind(val(params2), val(args2)), res2&);
-TEST(t::bind(val(params3), val(args3)), res3&);
-TEST(t::replace1(val(foo), val(res1)), foo&);
-TEST(t::replace(val(foo), t::bind(val(params1), val(args1))), foo&);
-TEST(t::replace(val(t::p0), t::bind(val(params1), val(args1))), foo&);
-TEST(t::replace(val(t::p1), t::bind(val(params1), val(args1))), f<foo, bar>&);
-TEST(t::replace(val(t::p0), t::bind(val(params2), val(args2))), foo&);
-TEST(t::replace(val(t::p1), t::bind(val(params2), val(args2))), foo&);
-TEST(t::replace(val(t::p0), t::bind(val(params3), val(args3))), foo&);
-TEST(t::replace(val(t::p1), t::bind(val(params3), val(args3))), foo&);
-TEST(t::replace(val(t::p2), t::bind(val(params3), val(args3))), baz&);
-TEST(t::replace(val(def), t::bind(val(params3), val(args3))), f<f<foo, foo>, baz>&);
-TEST(val(t::fun_t<t::p0(t::p0)>)(val(foo)), foo&);
+TEST(m::seq_(val(foo), val(bar)), m::seq<foo, bar>&);
+TEST(m::push_front(val(foo), m::seq_(val(bar))), m::seq<foo, bar>&);
+TEST(m::push_back(val(bar), m::seq_(val(foo))), m::seq<foo, bar>&);
+TEST(m::pop_front(m::seq_(val(foo))), m::seq<>&);
+TEST(m::at(val(m::size_t<1>), m::seq_(val(foo), val(bar), val(foo))), bar&);
+TEST(m::bind(val(params1), val(args1)), res1&);
+TEST(m::bind(val(params2), val(args2)), res2&);
+TEST(m::bind(val(params3), val(args3)), res3&);
+TEST(m::replace1(val(foo), val(res1)), foo&);
+TEST(m::replace(val(foo), m::bind(val(params1), val(args1))), foo&);
+TEST(m::replace(val(m::p0), m::bind(val(params1), val(args1))), foo&);
+TEST(m::replace(val(m::p1), m::bind(val(params1), val(args1))), f<foo, bar>&);
+TEST(m::replace(val(m::p0), m::bind(val(params2), val(args2))), foo&);
+TEST(m::replace(val(m::p1), m::bind(val(params2), val(args2))), foo&);
+TEST(m::replace(val(m::p0), m::bind(val(params3), val(args3))), foo&);
+TEST(m::replace(val(m::p1), m::bind(val(params3), val(args3))), foo&);
+TEST(m::replace(val(m::p2), m::bind(val(params3), val(args3))), baz&);
+TEST(m::replace(val(def), m::bind(val(params3), val(args3))), f<f<foo, foo>, baz>&);
+TEST(val(m::fun_t<m::p0(m::p0)>)(val(foo)), foo&);
 
-typedef f<t::_, t::type_t<bar> > pat1;
-typedef f<t::type_t<foo>, t::type_t<bar> > val1;
-typedef t::is_t<pat1, val1> isres1;
+typedef f<m::_, m::type_t<bar> > pat1;
+typedef f<m::type_t<foo>, m::type_t<bar> > val1;
+typedef m::is_t<pat1, val1> isres1;
 
-TEST(t::is<pat1>(val(val1)), isres1&);
-TEST(replace(val(val1), t::seq_()), val1&);
-TEST(t::bind(val(t::seq<pat1>), val(t::seq<val1>)), t::seq<>&);
-TEST(t::bind(val(t::seq<pat1>), t::deref(val(t::seq<decltype(t::replace(val(val1), t::seq_()))>))), t::seq<>&);
-TEST(t::is2(t::bind(val(t::seq<pat1>), t::deref(val(t::seq<decltype(t::replace(val(val1), t::seq_()))>)))), t::true_t&);
-TEST(t::is1(val(isres1), t::seq_()), t::true_t&);
+TEST(m::is<pat1>(val(val1)), isres1&);
+TEST(replace(val(val1), m::seq_()), val1&);
+TEST(m::bind(val(m::seq<pat1>), val(m::seq<val1>)), m::seq<>&);
+TEST(m::bind(val(m::seq<pat1>), m::deref(val(m::seq<decltype(m::replace(val(val1), m::seq_()))>))), m::seq<>&);
+TEST(m::is2(m::bind(val(m::seq<pat1>), m::deref(val(m::seq<decltype(m::replace(val(val1), m::seq_()))>)))), m::true_t&);
+TEST(m::is1(val(isres1), m::seq_()), m::true_t&);
 
-// auto g(t::p0 x)->decltype(t::is<f<f<t::_> > >(x))
+// auto g(m::p0 x)->decltype(m::is<f<f<m::_> > >(x))
 
 // template<typename T, typename Ts> struct cons_t {};
 // struct nil {};
-// auto cons(t::p0, t::p1) -> cons_t<t::p0, t::p1>;
+// auto cons(m::p0, m::p1) -> cons_t<m::p0, m::p1>;
 
-// auto add_const(t::p0) -> t::p0;
+// auto add_const(m::p0) -> m::p0;
 
-// auto map(t::p0, t::p1) -> 
+// auto map(m::p0, m::p1) -> 
 
-// TEST(t::run(cons(t::type<int>(), t::type<nil>())), list<int, nil>)
+// TEST(m::run(cons(m::type<int>(), m::type<nil>())), list<int, nil>)
 
 int main() {}

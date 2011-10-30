@@ -60,63 +60,50 @@ auto replace(Def& d, seq<seq<Params...>, seq<Args...> >&)
     -> decltype(replace1(d, val<seq<Params...> >(), val<seq<Args...> >()))&;
 
 // destruct values and bind variables
-template<typename ...R1,
-         typename ...R2>
-auto bind1(seq<R1...>& r1, seq<R2...>& r2, seq<>&, seq<>&)
-    -> decltype(seq_(r1, r2));
-template<typename ...R1,
-         typename ...R2,
+template<typename ...R1, typename ...R2>
+auto bind1(seq<seq<R1, R2>...>& r,
+           seq<>&, seq<>&)
+    -> decltype(r);
+template<typename ...R1, typename ...R2,
          typename I, typename ...Params,
          typename Arg, typename ...Args>
-auto bind1(seq<R1...>& r1,
-           seq<R2...>& r2,
+auto bind1(seq<seq<R1, R2>...>& r,
            seq<p<I>, Params...>& ps,
            seq<Arg, Args...>& as)
-    -> decltype(bind1(push_back(val<p<I> >(), r1),
-                      push_back(val<Arg>(), r2),
+    -> decltype(bind1(push_back(val<seq<p<I>, Arg> >(), r),
                       pop_front(ps),
                       pop_front(as)));
-template<typename ...R1,
-         typename ...R2,
+template<typename ...R1, typename ...R2,
          typename Con, typename ...Params,
          typename ...Args>
-auto bind1(seq<R1...>& r1,
-           seq<R2...>& r2,
+auto bind1(seq<seq<R1, R2>...>& r,
            seq<type_t<Con>, Params...>& ps,
            seq<type_t<Con>, Args...>& as)
-    -> decltype(bind1(r1,
-                      r2,
+    -> decltype(bind1(r,
                       pop_front(ps),
                       pop_front(as)));
-template<typename ...R1,
-         typename ...R2,
+template<typename ...R1, typename ...R2,
          typename ...Params,
          typename Arg, typename ...Args>
-auto bind1(seq<R1...>& r1,
-           seq<R2...>& r2,
+auto bind1(seq<seq<R1, R2>...>& r,
            seq<p<universal>, Params...>& ps,
            seq<Arg, Args...>& as)
-    -> decltype(bind1(r1,
-                      r2,
+    -> decltype(bind1(r,
                       pop_front(ps),
                       pop_front(as)));
-template<typename ...R1,
-         typename ...R2,
+template<typename ...R1, typename ...R2,
          template<typename ...> class Con, typename ...Ts, typename ...Params,
          typename ...Us, typename ...Args>
-auto bind1(seq<R1...>& r1,
-           seq<R2...>& r2,
+auto bind1(seq<seq<R1, R2>...>& r,
            seq<Con<Ts...>, Params...>&,
            seq<Con<Us...>, Args...>&)
-    -> decltype(bind1(r1,
-                      r2,
+    -> decltype(bind1(r,
                       val<seq<Ts..., Params...> >(),
                       val<seq<Us..., Args...> >()));
-template<typename ...R1,
-         typename ...R2,
+template<typename ...R1, typename ...R2,
          typename ...Params,
          typename ...Args>
-auto bind1(seq<R1...>&,
+auto bind1(seq<seq<R1, R2>...>& r,
            seq<R2...>&,
            seq<Params...>&,
            seq<Args...>&)
@@ -124,7 +111,7 @@ auto bind1(seq<R1...>&,
 
 template<typename ...Params, typename ...Args>
 auto bind(seq<Params...>& ps, seq<Args...>& as)
-    -> decltype(bind1(seq_(), seq_(), ps, as));
+    -> decltype(bind1(seq_(), ps, as));
 
 template<typename P, typename T> auto is(T& x) -> is_t<P, T>&;
 template<typename ...Params, typename ...Args> auto is1(seq<Params..., Args...>&) -> true_t;

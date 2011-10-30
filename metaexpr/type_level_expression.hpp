@@ -30,34 +30,30 @@ template<std::size_t I, typename T, typename ...Ts> auto at(size_t<I>&, seq<T, T
 
 // replace placeholders in body with arguments
 template<typename I,
-         typename ...Params,
-         typename Arg, typename ...Args>
-auto replace1(p<I>&, seq<p<I>, Params...>&, seq<Arg, Args...>&)
+         typename ...Params, typename Arg, typename ...Args>
+auto replace1(p<I>&, seq<seq<p<I>, Arg>, seq<Args, Params>...>&)
     -> Arg&;
 template<typename I,
-         typename J, typename ...Params,
-         typename Arg, typename ...Args>
-auto replace1(p<I>& i, seq<p<J>, Params...>& ps, seq<Arg, Args...>& as)
-    -> decltype(replace1(i, pop_front(ps), pop_front(as)));
+         typename J, typename ...Params, typename Arg, typename ...Args>
+auto replace1(p<I>& i, seq<seq<p<J>, Arg>, seq<Params, Args>...>& bs)
+    -> decltype(replace1(i, pop_front(bs)));
 template<template<typename...> class Con, typename ...Ts,
-         typename ...Params,
-         typename ...Args>
-auto replace1(Con<Ts...>&, seq<Params...>& ps, seq<Args...>& as)
-    -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), ps, as))...> >()));
+         typename ...Params, typename ...Args>
+auto replace1(Con<Ts...>&, seq<seq<Params, Args>...>& bs)
+    -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), bs))...> >()));
 template<typename P, typename T,
-         typename ...Params,
-         typename ...Args>
-auto replace1(is_t<P, T>&, seq<Params...>& ps, seq<Args...>& as)
-    -> decltype(is1(bind(val<seq<P> >(), val<seq<decltype(replace1(val<T>(), ps, as)))> >()));
+         typename ...Params, typename ...Args>
+auto replace1(is_t<P, T>&, seq<seq<Params, Args>...>& bs)
+    -> decltype(is1(bind(val<seq<P> >(), val<seq<decltype(replace1(val<T>(), bs)))> >()));
 template<typename Def,
          typename ...Params,
          typename ...Args>
-auto replace1(Def&, seq<Params...>&, seq<Args...>&)
+auto replace1(Def&, seq<seq<Params, Args>...>&)
     -> Def&;
 
 template<typename Def, typename ...Params, typename ...Args>
-auto replace(Def& d, seq<seq<Params...>, seq<Args...> >&)
-    -> decltype(replace1(d, val<seq<Params...> >(), val<seq<Args...> >()))&;
+auto replace(Def& d, seq<seq<Params, Args>...>& b)
+    -> decltype(replace1(d, b));
 
 // destruct values and bind variables
 template<typename ...R1, typename ...R2>

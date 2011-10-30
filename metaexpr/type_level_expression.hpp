@@ -5,7 +5,8 @@
 
 namespace arbital { namespace typelevel {
 
-template<typename T> struct type;
+template<typename T> struct type_t;
+template<typename T> struct fun_t;
 template<typename T> struct p;
 struct universal;
 template<typename ...Ts> struct seq;
@@ -108,7 +109,7 @@ auto bind(seq<Params...>& ps, seq<Args...>& as)
     -> decltype(bind1(seq_(), seq_(), ps, as));
 
 template<typename Def, typename ...Params>
-struct type<Def(Params...)> {
+struct fun_t<Def(Params...)> {
     template<typename ...Args>
     auto operator()(Args& ...) -> decltype(replace(val<Def>(), bind(val<seq<Params...> >(), val<seq<Args...> >())));
 };

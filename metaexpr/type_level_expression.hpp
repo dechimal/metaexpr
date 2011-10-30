@@ -43,8 +43,8 @@ auto replace1(Con<Ts...>&, seq<seq<Params, Args>...>& bs)
     -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), bs))...> >()));
 template<typename P, typename T,
          typename ...Params, typename ...Args>
-auto replace1(is_t<P, T>&, seq<seq<Params, Args>...>& bs)
-    -> decltype(is1(bind(val<seq<P> >(), val<seq<decltype(replace1(val<T>(), bs)))> >()));
+auto replace1(is_t<P, T>& d, seq<seq<Params, Args>...>& bs)
+    -> decltype(is1(d, bs));
 template<typename Def,
          typename ...Params,
          typename ...Args>
@@ -110,8 +110,11 @@ auto bind(seq<Params...>& ps, seq<Args...>& as)
     -> decltype(bind1(seq_(), ps, as));
 
 template<typename P, typename T> auto is(T& x) -> is_t<P, T>&;
-template<typename ...Params, typename ...Args> auto is1(seq<Params..., Args...>&) -> true_t;
-auto is1(false_t&) -> false_t&;
+template<typename P, typename T, typename ...Params, typename ...Args>
+auto is1(is_t<P, T>&, seq<seq<Params, Args>...>& bs)
+    -> decltype(is2(bind(val<seq<P> >(), deref(val<seq<decltype(replace(val<T>(), bs))> >()))));
+template<typename ...Params, typename ...Args> auto is2(seq<seq<Params, Args>...>&) -> true_t&;
+auto is2(false_t&) -> false_t&;
 
 template<typename Def, typename ...Params>
 struct fun_t<Def(Params...)> {

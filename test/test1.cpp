@@ -50,6 +50,17 @@ TEST(t::replace(val(t::p2), t::bind(val(params3), val(args3))), baz&);
 TEST(t::replace(val(def), t::bind(val(params3), val(args3))), f<f<foo, foo>, baz>&);
 TEST(val(t::fun_t<t::p0(t::p0)>)(val(foo)), foo&);
 
+typedef f<t::_, t::type_t<bar> > pat1;
+typedef f<t::type_t<foo>, t::type_t<bar> > val1;
+typedef t::is_t<pat1, val1> isres1;
+
+TEST(t::is<pat1>(val(val1)), isres1&);
+TEST(replace(val(val1), t::seq_()), val1&);
+TEST(t::bind(val(t::seq<pat1>), val(t::seq<val1>)), t::seq<>&);
+TEST(t::bind(val(t::seq<pat1>), t::deref(val(t::seq<decltype(t::replace(val(val1), t::seq_()))>))), t::seq<>&);
+TEST(t::is2(t::bind(val(t::seq<pat1>), t::deref(val(t::seq<decltype(t::replace(val(val1), t::seq_()))>)))), t::true_t&);
+TEST(t::is1(val(isres1), t::seq_()), t::true_t&);
+
 // auto g(t::p0 x)->decltype(t::is<f<f<t::_> > >(x))
 
 // template<typename T, typename Ts> struct cons_t {};

@@ -37,14 +37,14 @@ template<typename I,
          typename J, typename ...Params, typename Arg, typename ...Args>
 auto replace1(p<I>& i, seq<seq<p<J>, Arg>, seq<Params, Args>...>& bs)
     -> decltype(replace1(i, pop_front(bs)));
-template<template<typename...> class Con, typename ...Ts,
-         typename ...Params, typename ...Args>
-auto replace1(Con<Ts...>&, seq<seq<Params, Args>...>& bs)
-    -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), bs))...> >()));
 template<typename P, typename T,
          typename ...Params, typename ...Args>
 auto replace1(is_t<P, T>& d, seq<seq<Params, Args>...>& bs)
     -> decltype(is1(d, bs));
+template<template<typename...> class Con, typename ...Ts,
+         typename ...Params, typename ...Args>
+auto replace1(Con<Ts...>&, seq<seq<Params, Args>...>& bs)
+    -> decltype(deref(val<Con<decltype(replace1(val<Ts>(), bs))...> >()));
 template<typename Def,
          typename ...Params,
          typename ...Args>
@@ -100,7 +100,6 @@ template<typename ...R1, typename ...R2,
          typename ...Params,
          typename ...Args>
 auto bind1(seq<seq<R1, R2>...>& r,
-           seq<R2...>&,
            seq<Params...>&,
            seq<Args...>&)
     -> false_t&;

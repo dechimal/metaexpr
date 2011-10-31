@@ -5,7 +5,7 @@ TARGETS := $(patsubst %.cpp,%,$(wildcard *.cpp))
 
 all: $(TARGETS)
 $(TARGETS) : % : %.cpp
-	$(CXX) $(CXXFLAGS) $(ADDFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(EXTRAFLAGS) -o $@ $^
 
 .PHONY: clean test
 

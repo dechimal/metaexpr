@@ -212,11 +212,11 @@ typedef a<size_t<3> > a3;
 template<typename T> auto type() -> type_t<T>&;
 template<typename T> auto type(T&) -> type_t<T>&;
 template<typename T> auto type(type_t<T>&) -> type_t<T>&;
-template<typename T> auto run(type_t<T>&) -> T;
 
 }
 
 #define METAEXPR_VALUE_OF(...) ::metaexpr::val<__VA_ARGS__>()
+#define METAEXPR_FUN(...) ::metaexpr::fun_t<auto __VA_ARGS__>()
 #define METAEXPR_RUN(...) decltype(::metaexpr::run(__VA_ARGS__))
 
 #endif

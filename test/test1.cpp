@@ -4,6 +4,7 @@
 #include "boost/mpl/print.hpp"
 
 #define val(...) METAEXPR_VALUE_OF(__VA_ARGS__)
+#define fun(...) METAEXPR_FUN(__VA_ARGS__)
 #define run(...) METAEXPR_RUN(__VA_ARGS__)
 #define TEST(expr, ...) static_assert(boost::is_same<decltype(expr), __VA_ARGS__>::value, __FILE__ ": " BOOST_PP_STRINGIZE(__LINE__))
 
@@ -16,9 +17,26 @@ using boost::is_same;
 using boost::mpl::print;
 namespace m = metaexpr;
 
+template<typename Head, typename Tail>
+struct list;
+struct nil;
+
+template<typename T> struct left_t;
+template<typename T> struct right_t;
+
 int main() {
 
-    // seqの操作、bind, replace, 関数適用の呼び出し
+    // seqの操作
+    {
+        TEST(m::seq_(val(foo), val(bar)), m::seq<foo, bar>&);
+        TEST(m::push_front(val(foo), m::seq_(val(bar))), m::seq<foo, bar>&);
+        TEST(m::push_back(val(bar), m::seq_(val(foo))), m::seq<foo, bar>&);
+        TEST(m::pop_front(m::seq_(val(foo))), m::seq<>&);
+        TEST(m::at(val(m::size_t<1>), m::seq_(val(foo), val(bar), val(foo))), bar&);
+        TEST(m::append(m::seq_(val(foo), val(bar)), m::seq_(val(baz), val(baz))), m::seq<foo, bar, baz, baz>&);
+    }
+
+    // bind, replace, 関数適用の呼び出し
     {
         typedef m::seq<m::p0, m::p1, m::p2, m::p3> params1;
         typedef m::seq<foo, f<foo, bar>, m::type_t<foo>, baz> args1;
@@ -34,11 +52,6 @@ int main() {
 
         typedef f<f<m::p1, m::p0>, m::p2> def;
 
-        TEST(m::seq_(val(foo), val(bar)), m::seq<foo, bar>&);
-        TEST(m::push_front(val(foo), m::seq_(val(bar))), m::seq<foo, bar>&);
-        TEST(m::push_back(val(bar), m::seq_(val(foo))), m::seq<foo, bar>&);
-        TEST(m::pop_front(m::seq_(val(foo))), m::seq<>&);
-        TEST(m::at(val(m::size_t<1>), m::seq_(val(foo), val(bar), val(foo))), bar&);
         TEST(m::bind(val(params1), val(args1)), res1&);
         TEST(m::bind(val(params2), val(args2)), res2&);
         TEST(m::bind(val(params3), val(args3)), res3&);
@@ -120,5 +133,17 @@ int main() {
                             | m::when<pat1>(val(def1)),
                         val(m::seq<>)),
              f<m::type_t<bar>, m::type_t<bar> >&);
+
+    }
+
+    // それぽいコード
+    // TODO 高階関数、再帰関数
+    {
+        auto cons = fun((m::p0, m::p1) -> list<m::p0, m::p1>&);
+        auto head = fun((list<m::p0, m::_>) -> m::p0);
+        auto tail = fun((list<m::_, m::p0>) -> m::p0);
+        TEST(cons(m::type<int>(), m::type<nil>()), list<m::type_t<int>, m::type_t<nil> >&);
+        // auto map(m::p0 f, m::p1 xs) -> decltype(match(xs) | when<type_t<nil> >(val(type_t<nil>))
+        //                                                   | when<list<m::p2, m::p3> >(cons(f(_2)), rec(f, val(m::p1)))));
     }
 }

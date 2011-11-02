@@ -4,8 +4,9 @@ TARGETS := $(patsubst %.cpp,%,$(wildcard *.cpp))
 -include Makefile.local
 
 all: $(TARGETS)
+
 $(TARGETS) : % : %.cpp
-	$(CXX) $(CXXFLAGS) $(EXTRAFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(IPATH) $(EXTRAFLAGS) -o $@ $^
 
 .PHONY: clean test
 

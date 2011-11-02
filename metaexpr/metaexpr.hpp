@@ -15,6 +15,8 @@ template<std::size_t I> struct size_t;
 struct false_t;
 struct true_t;
 template<typename P, typename T> struct is_t;
+template<typename T, typename C> struct match_t;
+template<typename P, typename D> struct case_t;
 
 template<typename T> auto val() -> T&;
 template<template<typename...> class F, typename ...Ts> auto deref(F<Ts&...>&) -> F<Ts...>&;
@@ -27,11 +29,12 @@ template<typename T, typename ...Ts> auto pop_front(seq<T, Ts...>&) -> seq<Ts...
 template<typename T, typename ...Ts> auto at(size_t<0>&, seq<T, Ts...>&) -> T&;
 template<std::size_t I, typename T, typename ...Ts> auto at(size_t<I>&, seq<T, Ts...>&)
     -> decltype(at(val<size_t<I-1> >(), val<seq<Ts...> >()));
+template<typename ...Ts, typename ...Us> auto append(seq<Ts...>&, seq<Us...>&) -> seq<Ts..., Us...>&;
 
 // replace placeholders in body with arguments
 template<typename I,
          typename ...Params, typename Arg, typename ...Args>
-auto replace1(p<I>&, seq<seq<p<I>, Arg>, seq<Args, Params>...>&)
+auto replace1(p<I>&, seq<seq<p<I>, Arg>, seq<Params, Args>...>&)
     -> Arg&;
 template<typename I,
          typename J, typename ...Params, typename Arg, typename ...Args>
@@ -41,6 +44,10 @@ template<typename P, typename T,
          typename ...Params, typename ...Args>
 auto replace1(is_t<P, T>& d, seq<seq<Params, Args>...>& bs)
     -> decltype(is1(d, bs));
+template<typename T, typename Cases,
+         typename ...Params, typename ...Args>
+auto replace1(match_t<T, Cases>& d, seq<seq<Params, Args>...>& bs)
+    -> decltype(match1(d, bs));
 template<template<typename...> class Con, typename ...Ts,
          typename ...Params, typename ...Args>
 auto replace1(Con<Ts...>&, seq<seq<Params, Args>...>& bs)
@@ -111,9 +118,79 @@ auto bind(seq<Params...>& ps, seq<Args...>& as)
 template<typename P, typename T> auto is(T& x) -> is_t<P, T>&;
 template<typename P, typename T, typename ...Params, typename ...Args>
 auto is1(is_t<P, T>&, seq<seq<Params, Args>...>& bs)
-    -> decltype(is2(bind(val<seq<P> >(), deref(val<seq<decltype(replace(val<T>(), bs))> >()))));
+    -> decltype(is2(bind(val<seq<P> >(),
+                         deref(val<seq<decltype(replace(val<T>(),
+                                                        bs))> >()))));
 template<typename ...Params, typename ...Args> auto is2(seq<seq<Params, Args>...>&) -> true_t&;
 auto is2(false_t&) -> false_t&;
+
+template<typename T, typename ...Patterns, typename ...Defs,
+         typename Pattern, typename Def>
+auto operator|(match_t<T, seq<case_t<Patterns, Defs>...> >&,
+               case_t<Pattern, Def>&)
+    -> match_t<T, seq<case_t<Patterns, Defs>...,
+                      case_t<Pattern, Def> > >&;
+
+template<typename Pattern, typename Def>
+auto when(Def&) -> case_t<Pattern, Def>&;
+
+template<typename T> auto match(T&) -> match_t<T, seq<> >&;
+template<typename T, typename Pattern, typename Def, typename ...Patterns, typename ...Defs,
+         typename ...Params, typename ...Args>
+auto match1(match_t<T, seq<case_t<Pattern, Def>,
+                           case_t<Patterns, Defs>...> >& cs,
+            seq<seq<Params, Args>...>& bs)
+    -> decltype(match2(val<T>(),
+                       val<Pattern>(),
+                       val<Def>(),
+                       val<seq<case_t<Patterns, Defs>...> >(),
+                       bs));
+template<typename T,
+         typename Pattern,
+         typename Def,
+         typename ...Patterns, typename ...Defs,
+         typename ...Params, typename ...Args>
+auto match2(T& x,
+            Pattern& p,
+            Def& d,
+            seq<case_t<Patterns, Defs>...>& cs,
+            seq<seq<Params, Args>...>& bs)
+    -> decltype(match3(bind(val<seq<Pattern> >(), deref(val<seq<decltype(replace(x, bs))> >())),
+                       x,
+                       d,
+                       cs,
+                       bs));
+template<typename ...Params1, typename ...Args1,
+         typename T,
+         typename Def,
+         typename ...Patterns, typename ...Defs,
+         typename ...Params, typename ...Args>
+auto match3(seq<seq<Params1, Args1>...>& bs1,
+            T&,
+            Def& d,
+            seq<case_t<Patterns, Defs>...>&,
+            seq<seq<Params, Args>...>& bs)
+    -> decltype(replace(d, append(bs1, bs)));
+template<typename T,
+         typename D,
+         typename Pattern, typename Def, typename ...Patterns, typename ...Defs,
+         typename ...Params, typename ...Args>
+auto match3(false_t&,
+            T& x,
+            D&,
+            seq<case_t<Pattern, Def>, case_t<Patterns, Defs>...>& cs,
+            seq<seq<Params, Args>...>& bs)
+    -> decltype(match2(x,
+                       val<Pattern>(),
+                       val<Def>(),
+                       pop_front(cs),
+                       bs));
+// t = replace(val<T>(), bs);
+// bs1 = bind(val<Pattern>(), deref(val<seq<decltype(t)> >()));
+// r = if bs1 then replace(val<Def>(), append(bs, bs1)) else match1…
+
+// match(x) | when<pat>(def)
+//          | when<pat>(def);
 
 template<typename Def, typename ...Params>
 struct fun_t<Def(Params...)> {

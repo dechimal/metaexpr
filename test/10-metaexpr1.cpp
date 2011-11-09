@@ -31,6 +31,7 @@ template<typename> struct ns_test;
 METAEXPR_TYPE(foo_t, (foo));
 METAEXPR_TYPE(bar_t, (bar));
 METAEXPR_TYPE(baz_t, (baz));
+METAEXPR_TYPE(qux_t, (qux, hoge, fuga)(quux, piyo, hogera));
 
 #undef METAEXPR_ADL_BARRIER_TEMPLATE
 

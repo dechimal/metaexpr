@@ -54,16 +54,17 @@ namespace m = metaexpr;
 #define METAEXPR_VALUE_CTOR(type, tag, ...) \
     METAEXPR_VALUE_CTOR_I(type, \
                           tag, \
-                          BOOST_PP_VARIADIC_TO_SEQ (__VA_ARGS__), \
-                          BOOST_PP_VARIADIC_SIZE (__VA_ARGS__), \
-                          BOOST_PP_IS_EMPTY (__VA_ARGS__))
+                          BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), \
+                          BOOST_PP_VARIADIC_SIZE(__VA_ARGS__), \
+                          BOOST_PP_IS_EMPTY(BOOST_PP_TUPLE_ELEM(0, (__VA_ARGS__))))
 #define METAEXPR_VALUE_CTOR_I(type, tag, fields, size, empty) \
     METAEXPR_VALUE_CTOR_II(type, tag, fields, size, empty)
 #define METAEXPR_VALUE_CTOR_II(type, tag, fields, size, empty) \
     BOOST_PP_IF(empty, METAEXPR_VALUE_CTOR_0, METAEXPR_VALUE_CTOR_N) (\
         type, tag, BOOST_PP_CAT(tag, _impl), fields, size)
 
-#define METAEXPR_VALUE_CTOR_0(type, tag, tag_impl, fields, size) ;\
+#define METAEXPR_VALUE_CTOR_0(type, tag, tag_impl, fields, size) \
+    ; \
     struct tag_impl; \
     using tag = type<tag_impl>; \
     auto BOOST_PP_CAT(mk_, tag)() -> tag&
@@ -72,13 +73,14 @@ namespace m = metaexpr;
     METAEXPR_VALUE_CTOR_N_I(type, tag, tag_impl, fields, size)
 #define METAEXPR_VALUE_CTOR_N_I(type, tag, tag_impl, fields, size) \
     METAEXPR_VALUE_CTOR_N_II(type, tag, tag_impl, fields, size)
-#define METAEXPR_VALUE_CTOR_N_II(type, tag, tag_impl, fields, size) ;\
+#define METAEXPR_VALUE_CTOR_N_II(type, tag, tag_impl, fields, size) \
+    ; \
     template<BOOST_PP_ENUM_PARAMS(size, typename BOOST_PP_INTERCEPT)> struct tag_impl; \
     template<BOOST_PP_ENUM_PARAMS(size, typename T)> \
     using tag = type<tag_impl<BOOST_PP_ENUM_PARAMS(size, T)> >; \
     template<BOOST_PP_ENUM_PARAMS(size, typename T)> \
     auto BOOST_PP_CAT(mk_, tag)(BOOST_PP_ENUM_BINARY_PARAMS(size, T ,& BOOST_PP_INTERCEPT)) \
-        -> tag<BOOST_PP_ENUM_PARAMS(size, T)>&; \
+        -> tag<BOOST_PP_ENUM_PARAMS(size, T)>& \
     METAEXPR_VALUE_CTOR_N_FIELD_ACCESSORS(tag, size, fields)
 #define METAEXPR_VALUE_CTOR_N_FIELD_ACCESSORS(tag, size, fields) \
     BOOST_PP_SEQ_FOR_EACH_I(METAEXPR_VALUE_CTOR_N_FIELD_ACCOESSORS_M, (tag, size), fields)
@@ -87,6 +89,7 @@ namespace m = metaexpr;
 #define METAEXPR_VALUE_CTOR_N_FIELD_ACCOESSORS_M_I(r, data, i, field) \
     METAEXPR_VALUE_CTOR_N_FIELD_ACCOESSORS_M_II(r, data, i, field)
 #define METAEXPR_VALUE_CTOR_N_FIELD_ACCOESSORS_M_II(r, tag, size, i, field) \
+    ; \
     template<BOOST_PP_ENUM_PARAMS(size, typename T)> auto \
     BOOST_PP_CAT(tag, BOOST_PP_CAT(_, field)) \
         (tag<BOOST_PP_ENUM_PARAMS(size, T)>&) -> BOOST_PP_CAT(T, i)&
